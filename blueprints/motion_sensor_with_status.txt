@@ -10,14 +10,13 @@ blueprint:
         entity: {}
     light_target:
       name: Light
-      description: The light to control
+      description: The light (or any entity) to control
       selector:
         target:
-          entity:
-            domain: light
+          entity: {}
     no_motion_wait:
       name: Wait time after no motion
-      description: Time to wait before turning off the light after no motion is detected
+      description: Time to wait before turning off the light (or any entity) after no motion is detected
       default: 120
       selector:
         number:
@@ -36,7 +35,7 @@ condition:
     state: 'off'
 
 action:
-  - service: light.turn_on
+  - service: homeassistant.turn_on
     target: !input light_target
 
   - wait_for_trigger:
@@ -49,5 +48,5 @@ action:
     entity_id: !input motion_sensor
     state: 'off'
 
-  - service: light.turn_off
+  - service: homeassistant.turn_off
     target: !input light_target
