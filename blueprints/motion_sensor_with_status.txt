@@ -7,8 +7,7 @@ blueprint:
       name: Motion Sensor
       description: The motion sensor that triggers the light
       selector:
-        entity:
-          domain: sensor
+        entity: {}
     light_target:
       name: Light
       description: The light to control
