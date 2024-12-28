@@ -1,22 +1,20 @@
 blueprint:
-  name: Multi-Room Heating Floor Control
-  description: Automatically control heating floors for multiple rooms based on temperature thresholds.
+  name: Heating Floor Control by Temperature
+  description: Automatically control heating floors based on temperature thresholds.
   domain: automation
   input:
-    temperature_sensors:
+    temperature_sensor:
       name: Temperature Sensors
       description: List of temperature sensors for each room.
       selector:
-        target:
-          entity:
-            domain: sensor
-    heating_switches:
+        entity:
+          domain: sensor
+    heating_switch:
       name: Heating Switches
       description: List of switches controlling the heating floors for each room.
       selector:
-        target:
-          entity:
-            domain: switch
+        entity:
+          domain: switch
     max_temperature:
       name: Maximum Temperature
       description: Temperature above which heating will turn off.
@@ -39,38 +37,24 @@ blueprint:
           mode: slider
 trigger:
   - platform: state
-    entity_id: !input temperature_sensors
+    entity_id: !input temperature_sensor
 condition: []
 action:
   - choose:
       - conditions:
-          - condition: template
-            value_template: >
-              {{
-                states[trigger.entity_id].state | float > (max_temperature | float)
-              }}
+          - condition: numeric_state
+            entity_id: !input temperature_sensor
+            above: !input max_temperature
         sequence:
           - service: switch.turn_off
             target:
-              entity_id: >
-                {{
-                  (heating_switches | list | map(attribute='entity_id'))[
-                    (temperature_sensors | list | map(attribute='entity_id')).index(trigger.entity_id)
-                  ]
-                }}
+              entity_id: !input heating_switch
       - conditions:
-          - condition: template
-            value_template: >
-              {{
-                states[trigger.entity_id].state | float < (min_temperature | float)
-              }}
+          - condition: numeric_state
+            entity_id: !input temperature_sensor
+            below: !input min_temperature
         sequence:
           - service: switch.turn_on
             target:
-              entity_id: >
-                {{
-                  (heating_switches | list | map(attribute='entity_id'))[
-                    (temperature_sensors | list | map(attribute='entity_id')).index(trigger.entity_id)
-                  ]
-                }}
+              entity_id: !input heating_switch
 mode: parallel
