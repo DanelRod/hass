@@ -1,6 +1,6 @@
 blueprint:
   name: Floor Heating Automation with HeishaMon
-  description: Turn off HeishaMon Panasonic Heat Pump when all devices are off and turn it on if at least one device is on.
+  description: Turn off HeishaMon Panasonic Heat Pump only when all devices are off and turn it on if at least one device is on.
   domain: automation
   input:
     monitored_devices:
@@ -28,7 +28,7 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-              {{ not states | selectattr('entity_id', 'in', (input_monitored_devices | map('entity_id') | list)) | selectattr('state', 'eq', 'on') | list }}
+              {{ expand(!input monitored_devices) | selectattr('state', 'eq', 'on') | list | count == 0 }}
         sequence:
           - service: switch.turn_off
             target:
@@ -36,7 +36,7 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-              {{ states | selectattr('entity_id', 'in', (input_monitored_devices | map('entity_id') | list)) | selectattr('state', 'eq', 'on') | list | count > 0 }}
+              {{ expand(!input monitored_devices) | selectattr('state', 'eq', 'on') | list | count > 0 }}
         sequence:
           - service: switch.turn_on
             target:
