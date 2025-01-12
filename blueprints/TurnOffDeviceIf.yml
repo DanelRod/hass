@@ -28,7 +28,7 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-              {{ expand(states.switch) | selectattr('entity_id', 'in', (input.monitored_devices)) | selectattr('state', 'eq', 'on') | list | count == 0 }}
+              {{ expand(states.switch) | selectattr('entity_id', 'in', !input monitored_devices) | selectattr('state', 'eq', 'on') | list | count == 0 }}
         sequence:
           - service: switch.turn_off
             target:
@@ -36,7 +36,7 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-              {{ expand(states.switch) | selectattr('entity_id', 'in', (input.monitored_devices)) | selectattr('state', 'eq', 'on') | list | count > 0 }}
+              {{ expand(states.switch) | selectattr('entity_id', 'in', !input monitored_devices) | selectattr('state', 'eq', 'on') | list | count > 0 }}
         sequence:
           - service: switch.turn_on
             target:
