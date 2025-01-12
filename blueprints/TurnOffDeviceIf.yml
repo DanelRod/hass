@@ -1,0 +1,45 @@
+blueprint:
+  name: Floor Heating Automation with HeishaMon
+  description: Turn off HeishaMon Panasonic Heat Pump when all devices are off and turn it on if at least one device is on.
+  domain: automation
+  input:
+    monitored_devices:
+      name: Devices to Monitor
+      description: List of devices to monitor for on/off status
+      selector:
+        entity:
+          multiple: true
+          domain: switch
+    heatpump_switch:
+      name: HeishaMon Panasonic Heat Pump
+      description: The switch entity controlling the heat pump main power
+      selector:
+        entity:
+          domain: switch
+
+trigger:
+  - platform: state
+    entity_id: !input monitored_devices
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ not states | selectattr('entity_id', 'in', (input_monitored_devices | map('entity_id') | list)) | selectattr('state', 'eq', 'on') | list }}
+        sequence:
+          - service: switch.turn_off
+            target:
+              entity_id: !input heatpump_switch
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ states | selectattr('entity_id', 'in', (input_monitored_devices | map('entity_id') | list)) | selectattr('state', 'eq', 'on') | list | count > 0 }}
+        sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: !input heatpump_switch
+
+mode: single
