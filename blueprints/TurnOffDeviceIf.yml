@@ -19,7 +19,7 @@ blueprint:
 
 trigger:
   - platform: state
-    entity_id: !input monitored_devices
+    entity_id: "{{ input.monitored_devices }}"
 
 condition: []
 
@@ -28,18 +28,18 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-              {{ expand(!input monitored_devices) | selectattr('state', 'eq', 'on') | list | count == 0 }}
+              {{ expand(input.monitored_devices) | selectattr('state', 'eq', 'on') | list | count == 0 }}
         sequence:
           - service: switch.turn_off
             target:
-              entity_id: !input heatpump_switch
+              entity_id: "{{ input.heatpump_switch }}"
       - conditions:
           - condition: template
             value_template: >-
-              {{ expand(!input monitored_devices) | selectattr('state', 'eq', 'on') | list | count > 0 }}
+              {{ expand(input.monitored_devices) | selectattr('state', 'eq', 'on') | list | count > 0 }}
         sequence:
           - service: switch.turn_on
             target:
-              entity_id: !input heatpump_switch
+              entity_id: "{{ input.heatpump_switch }}"
 
 mode: single
